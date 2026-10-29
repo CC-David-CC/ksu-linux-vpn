@@ -6,7 +6,7 @@ Linux NetworkManager and OpenConnect support for Kennesaw State University's Glo
 
 ## Components
 
-- `patches/openconnect-networkmanager.patch`: OpenConnect 9.12 portal SAML handoff and host identifier changes. The test generates a new identifier; stability and policy implications require further study.
+- `patches/openconnect-networkmanager.patch`: OpenConnect 9.12 portal SAML handoff and host identifier changes. The test generates a new identifier; stability and policy implications require further study. This patch additionally scopes KSU-specific request changes and suppresses cookie logging; those refinements await a fresh live test.
 - `patches/gnutls-certificate-chain.patch`: GnuTLS 3.8.12 certificate-chain path selection change. Selected upstream checks passed, including hostname rejection, but this is not a complete security audit. Certificate checks remain enabled.
 - `desktop/60-codiserver-network.rules`: CodiServer policy allowing active local desktop users limited network control, without sudo. This policy is system-specific; administrators should review it before installing.
 

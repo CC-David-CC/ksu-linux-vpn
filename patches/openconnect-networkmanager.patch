@@ -12,6 +12,17 @@
  			vpn_progress(vpninfo, PRG_DEBUG, _("SAML authentication required; using portal-prelogonuserauthcookie to continue SAML.\n"));
  		else if (!vpninfo->open_webview && ctx->alt_secret)
  			vpn_progress(vpninfo, PRG_DEBUG, _("Destination form field %s was specified; assuming SAML %s authentication is complete.\n"),
+@@ -302,8 +302,8 @@
+ 	{ .opt="password-expiration-days", .show=1 },   /* days until password expires, if not -1 */
+ 	{ .opt="clientVer", .err_missing=1, .check="4100" },
+ 	{ .opt="preferred-ip", .save=1 },
+-	{ .opt="portal-userauthcookie", .show=1},
+-	{ .opt="portal-prelogonuserauthcookie", .show=1},
++	{ .opt="portal-userauthcookie"},
++	{ .opt="portal-prelogonuserauthcookie"},
+ 	{ .opt="preferred-ipv6", .save=1 },
+ 	{ .opt="usually-equals-4", .show=1 },           /* newer servers send "4" here, meaning unknown */
+ 	{ .opt="usually-equals-unknown", .show=1 },     /* newer servers send "unknown" here */
 @@ -523,6 +523,8 @@
  		}
  	}
@@ -26,7 +37,7 @@
  		if (ctx->form->action)
  			append_opt(request_body, "inputStr", ctx->form->action);
 +		/* Experiment: submit WebView SAML tokens to the prelogin field. */
-+		if (portal && vpninfo->open_webview) {
++		if (portal && vpninfo->open_webview && !strcasecmp(vpninfo->hostname, "vpn.kennesaw.edu")) {
 +			struct oc_form_opt *o;
 +			for (o = ctx->form->opts; o; o = o->next) {
 +				if (o->type == OC_FORM_OPT_SSO_TOKEN) {
@@ -40,7 +51,7 @@
  		append_form_opts(vpninfo, ctx->form, request_body);
 +#ifdef __linux__
 +		/* GlobalProtect uses the platform firmware UUID for host-id. */
-+		if (portal && !strcmp(gpst_os_name(vpninfo), "Linux")) {
++		if (portal && !strcasecmp(vpninfo->hostname, "vpn.kennesaw.edu") && !strcmp(gpst_os_name(vpninfo), "Linux")) {
 +			char id[64];
 +			FILE *f = fopen("/proc/sys/kernel/random/uuid", "r");
 +			if (f) {
