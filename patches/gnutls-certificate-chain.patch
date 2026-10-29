@@ -1,0 +1,21 @@
+--- a/lib/x509/verify-high.c
++++ b/lib/x509/verify-high.c
+@@ -1454,6 +1454,18 @@
+ 							 cert_list_size - i);
+ 		}
+ 
++		/* Explore a trusted issuer only after the input segment is sorted. */
++		for (j = 0; j < sorted_size; j++) {
++			gnutls_x509_crt_t trusted = NULL;
++			if (gnutls_x509_trust_list_get_issuer(list, cert_list[i + j],
++					&trusted, GNUTLS_TL_GET_COPY) == 0) {
++				gnutls_x509_crt_deinit(trusted);
++				sorted_size = j + 1;
++				cert_list_size = i + sorted_size;
++				break;
++			}
++		}
++
+ 		assert(sorted_size > 0);
+ 
+ 		/* Remove duplicates. */

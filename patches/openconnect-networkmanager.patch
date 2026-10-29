@@ -1,0 +1,59 @@
+--- a/auth-globalprotect.c
++++ b/auth-globalprotect.c
+@@ -96,9 +96,9 @@
+ 
+ 	if (saml_method && s) {
+ 		/* Allow the legacy workflow (no GUI setting up open_webview) to keep working */
+-		if (!vpninfo->open_webview && ctx->portal_userauthcookie)
++		if (ctx->portal_userauthcookie)
+ 			vpn_progress(vpninfo, PRG_DEBUG, _("SAML authentication required; using portal-userauthcookie to continue SAML.\n"));
+-		else if (!vpninfo->open_webview && ctx->portal_prelogonuserauthcookie)
++		else if (ctx->portal_prelogonuserauthcookie)
+ 			vpn_progress(vpninfo, PRG_DEBUG, _("SAML authentication required; using portal-prelogonuserauthcookie to continue SAML.\n"));
+ 		else if (!vpninfo->open_webview && ctx->alt_secret)
+ 			vpn_progress(vpninfo, PRG_DEBUG, _("Destination form field %s was specified; assuming SAML %s authentication is complete.\n"),
+@@ -523,6 +523,8 @@
+ 		}
+ 	}
+ 
++	vpn_progress(vpninfo, PRG_INFO, "Portal override cookie present: %s\n", ctx->portal_userauthcookie ? "yes" : "no");
++
+ 	if (!gateways) {
+ no_gateways:
+ 		vpn_progress(vpninfo, PRG_ERR,
+@@ -699,7 +701,35 @@
+ 			append_opt(request_body, "preferred-ipv6", vpninfo->ip_info.addr);
+ 		if (ctx->form->action)
+ 			append_opt(request_body, "inputStr", ctx->form->action);
++		/* Experiment: submit WebView SAML tokens to the prelogin field. */
++		if (portal && vpninfo->open_webview) {
++			struct oc_form_opt *o;
++			for (o = ctx->form->opts; o; o = o->next) {
++				if (o->type == OC_FORM_OPT_SSO_TOKEN) {
++					char *name = strdup("prelogin-cookie");
++					if (!name) { result = -ENOMEM; goto out; }
++					free(o->name);
++					o->name = name;
++				}
++			}
++		}
+ 		append_form_opts(vpninfo, ctx->form, request_body);
++#ifdef __linux__
++		/* GlobalProtect uses the platform firmware UUID for host-id. */
++		if (portal && !strcmp(gpst_os_name(vpninfo), "Linux")) {
++			char id[64];
++			FILE *f = fopen("/proc/sys/kernel/random/uuid", "r");
++			if (f) {
++				if (fgets(id, sizeof(id), f)) {
++					id[strcspn(id, "\r\n")] = 0;
++					if (strlen(id) == 36)
++						append_opt(request_body, "host-id", id);
++				}
++				fclose(f);
++			}
++		}
++#endif
++
+ 		if ((result = buf_error(request_body)))
+ 			goto out;
+ 

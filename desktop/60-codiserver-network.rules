@@ -1,0 +1,13 @@
+// Allow an active local desktop user to operate network connections without
+// granting sudo or general administration rights.
+polkit.addRule(function(action, subject) {
+    var allowed = [
+        'org.freedesktop.NetworkManager.network-control',
+        'org.freedesktop.NetworkManager.enable-disable-network',
+        'org.freedesktop.NetworkManager.enable-disable-wifi',
+        'org.freedesktop.NetworkManager.wifi.scan',
+        'org.freedesktop.NetworkManager.settings.modify.own'
+    ];
+    if (subject.local && subject.active && allowed.indexOf(action.id) !== -1)
+        return polkit.Result.YES;
+});
