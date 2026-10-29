@@ -2,11 +2,11 @@
 
 Linux NetworkManager and OpenConnect support for Kennesaw State University's GlobalProtect VPN. The beta has connected on a CodiServer Surface using Microsoft sign-in, KSU DNS and simultaneous local-network access. It requires no maint password when the VPN connection is owned by the desktop user and network permissions are configured.
 
-**Status:** One Surface and one account tested. The certificate-path change requires further security review; long sessions, actual network interruption, installation, and other distributions and hardware are not yet verified. This repository does not yet provide an installer or a tested general-purpose installation recipe.
+**Status:** Beta; further updates and testing are needed. The packaged beta connected on one Surface with one account, but a fresh CodiServer ISO booted in a Surface-hosted VM did not connect: the KSU sign-in opened without a maint password, then the attempt timed out with “no valid VPN secrets.” The cause is not yet established. The certificate-path change requires further security review; long sessions, actual network interruption, installation, and other distributions and hardware are not yet verified. This repository does not yet provide an installer or a tested general-purpose installation recipe.
 
 ## Components
 
-- `recipe/openconnect-networkmanager.patch`: OpenConnect 9.12 portal SAML handoff and host identifier changes. The test generates a new identifier; stability and policy implications require further study. This patch additionally scopes KSU-specific request changes and suppresses cookie logging; those refinements await a fresh live test.
+- `recipe/openconnect-networkmanager.patch`: OpenConnect 9.12 portal SAML handoff and host identifier changes. The test generates a new identifier; stability and policy implications require further study. This patch additionally scopes KSU-specific request changes and suppresses cookie logging; the packaged version connected on the Surface but failed the fresh-image VM test described above.
 - `recipe/gnutls-certificate-chain.patch`: GnuTLS 3.8.12 certificate-chain path selection change. Selected upstream checks passed, including hostname rejection, but this is not a complete security audit. Certificate checks remain enabled.
 - `recipe/60-codiserver-network.rules`: CodiServer policy allowing active local desktop users limited network control, without sudo. This policy is system-specific; administrators should review it before installing.
 
@@ -37,6 +37,7 @@ The command creates `codiserver-ksu-vpn-beta_0.1.0-1_amd64.deb` and
 afterward a desktop user can connect through the user-owned KSU GlobalProtect
 profile without a maint password. The package keeps its patched libraries
 private to the KSU authentication dialog; it does not replace system TLS.
-The package build and one Surface connection succeeded. A fresh ISO/VM test,
-long-running connection, real network interruption and broader certificate
+The package build and one Surface connection succeeded. A fresh ISO booted in a
+VM but its VPN connection failed during authentication, as described above.
+Long-running connection, real network interruption and broader certificate
 security review are still pending.
