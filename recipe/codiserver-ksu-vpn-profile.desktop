@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=KSU VPN profile setup
+Exec=/usr/lib/codiserver-ksu-vpn/ensure-profile
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

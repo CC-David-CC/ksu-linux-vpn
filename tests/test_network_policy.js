@@ -2,7 +2,7 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 let selectedRule;
 var polkit = {Result: {YES: 'yes'}, addRule: (rule) => { selectedRule = rule; }};
-const bytes = Gio.File.new_for_path('desktop/60-codiserver-network.rules').load_contents(null)[1];
+const bytes = Gio.File.new_for_path('recipe/60-codiserver-network.rules').load_contents(null)[1];
 eval(new TextDecoder().decode(bytes));
 function check(condition, description) { if (!condition) throw new Error(description); }
 const active = {local: true, active: true};
